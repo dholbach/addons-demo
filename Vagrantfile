@@ -1,3 +1,5 @@
+PATCHED_KUBEADM = "/home/vagrant/kubeadm/kubeadm"
+
 Vagrant.configure("2") do |config|
     config.vm.box = "bento/ubuntu-18.04"
   
@@ -9,6 +11,16 @@ Vagrant.configure("2") do |config|
     apt_docker = "18.09.7-0ubuntu1~18.04.4"
     apt_k8s    = "1.16.2-00"
     v_k8s      = "1.16.2"
+
+    config.vm.synced_folder \
+        "/home/daniel/go/src/github.com/kubernetes/kubernetes/bazel-bin/cmd/kubeadm/linux_amd64_pure_stripped", \
+        "/home/vagrant/kubeadm"
+
+    config.vm.provision "shell", privileged: true, inline: <<-SHELL
+        if [ ! -d ${PATCHED_KUBEADM} ]; cp ${PATCHED_KUBEADM} /usr/local/bin; fi
+            chmod a+x /usr/local/bin/kubeadm
+        SHELL
+    end
 
     num_controlplane = 1 # at the moment, scripts only support 1
     num_workers      = 1
@@ -23,12 +35,11 @@ Vagrant.configure("2") do |config|
       # Add the Kubernetes apt signing key and repository
       curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
       echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
-      # Install kubeadm, kubelet, kubectl and docker
+      # Install kubelet, kubectl and docker
       ${aptGet} update && ${aptGet} install -y \
         docker.io=#{apt_docker} \
         kubelet=#{apt_k8s} \
-        kubectl=#{apt_k8s} \
-        kubeadm=#{apt_k8s}
+        kubectl=#{apt_k8s}
       # Disable swap, it must not be used when Kubernetes is running
       swapoff -a
       sed -i /swap/d /etc/fstab
