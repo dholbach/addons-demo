@@ -6,14 +6,12 @@ Vagrant.configure("2") do |config|
       vb.memory = "2048"
     end
   
-    folder     = "v1.16"
     apt_docker = "18.09.7-0ubuntu1~18.04.4"
-    apt_k8s    = "1.16.0-00"
-    v_k8s      = "1.16.0"
-    v_sonobuoy = "0.16.0"
-  
+    apt_k8s    = "1.16.2-00"
+    v_k8s      = "1.16.2"
+
     num_controlplane = 1 # at the moment, scripts only support 1
-    num_workers      = 2
+    num_workers      = 1
   
     install = <<~SHELL
       set -ex
@@ -21,8 +19,7 @@ Vagrant.configure("2") do |config|
       aptGet='apt-get -q'
       # Make sure curl and apt SSL support is available
       ${aptGet} update && ${aptGet} install -y apt-transport-https curl
-      # Download sonobuoy
-      curl -sSL https://github.com/heptio/sonobuoy/releases/download/v#{v_sonobuoy}/sonobuoy_#{v_sonobuoy}_linux_amd64.tar.gz | tar -xz --exclude LICENSE -C /usr/bin
+
       # Add the Kubernetes apt signing key and repository
       curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
       echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
@@ -64,7 +61,6 @@ Vagrant.configure("2") do |config|
         export KUBECONFIG=/etc/kubernetes/admin.conf
         alias k="kubectl"
         alias ks="kubectl -n kube-system"
-        alias kt="kubectl -n heptio-sonobuoy"
       EOF
       # Init the cluster
       eth1_ip=$(ifconfig eth1 | awk '$1 == "inet" {print $2}')
@@ -94,7 +90,7 @@ Vagrant.configure("2") do |config|
       " >> /var/log/kubeadm_join_async.log 2>&1 & disown
     SHELL
   
-    sonobuoy = <<~SHELL
+    check = <<~SHELL
       set -ex
       echo "Waiting for all nodes to join..."
       export KUBECONFIG=/etc/kubernetes/admin.conf
@@ -125,15 +121,6 @@ Vagrant.configure("2") do |config|
       then echo "All pods are now running"
       else echo "Timed out waiting for all pods to run" 1>&2 && exit 2
       fi
-      # Run end to end tests
-      sonobuoy run --wait --skip-preflight
-      # Fetch the results
-      results=$(sonobuoy retrieve)
-      # Extract to the host machine
-      mkdir -p /vagrant/#{folder}
-      tar xzf $results -C /vagrant/#{folder}
-      # Print
-      sonobuoy e2e $results
     SHELL
   
     config.vm.provision "shell", inline: install
@@ -151,7 +138,7 @@ Vagrant.configure("2") do |config|
         controlplane.vm.hostname = "controlplane-#{i}"
         controlplane.vm.network "private_network", ip: "192.168.5.#{10 + i}"
         controlplane.vm.provision "shell", inline: kubeadm_init
-        controlplane.vm.provision "shell", inline: sonobuoy
+        controlplane.vm.provision "shell", inline: check
       end
     end
   
