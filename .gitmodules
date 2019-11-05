@@ -1,0 +1,3 @@
+[submodule "vm-config/intel-device-plugins-for-kubernetes"]
+	path = vm-config/intel-device-plugins-for-kubernetes
+	url = https://github.com/intel/intel-device-plugins-for-kubernetes
