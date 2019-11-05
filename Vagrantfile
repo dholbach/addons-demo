@@ -6,23 +6,36 @@ Vagrant.configure("2") do |config|
       vb.memory = "2048"
     end
   
-    apt_docker = "18.09.7-0ubuntu1~18.04.4"
-    apt_k8s    = "1.16.2-00"
-    v_k8s      = "1.16.2"
+    apt_docker      = "18.09.7-0ubuntu1~18.04.4"
+    apt_k8s         = "1.16.2-00"
+    v_k8s           = "1.16.2"
+    v_HOME          = "/home/vagrant"
+    PATCHED_KUBEADM = "#{v_HOME}/kubeadm/kubeadm"
+    CONFIG_DIR      = "#{v_HOME}/vm-config"
 
     # Make patch kubeadm available
     config.vm.synced_folder \
-        "/home/daniel/go/src/github.com/kubernetes/kubernetes/bazel-bin/cmd/kubeadm/linux_amd64_pure_stripped", \
-        "/home/vagrant/kubeadm"
+        "~/go/src/github.com/kubernetes/kubernetes/bazel-bin/cmd/kubeadm/linux_amd64_pure_stripped", \
+        "#{v_HOME}/kubeadm"
+
+    # add some additional config and scripts
+    config.vm.synced_folder "./vm-config", "#{v_HOME}/vm-config"
 
     config.vm.provision "shell", privileged: true, inline: <<-SHELL
         set -ex
-        PATCHED_KUBEADM='/home/vagrant/kubeadm/kubeadm'
-        if [ -f ${PATCHED_KUBEADM} ]; then
-            cp ${PATCHED_KUBEADM} /usr/local/bin
+        if [ -f #{PATCHED_KUBEADM} ]; then
+            cp #{PATCHED_KUBEADM} /usr/local/bin
             chmod a+x /usr/local/bin/kubeadm
         fi
+
+        if [ -f "#{CONFIG_DIR}/10-kubeadm.conf" ]; then
+          if [ ! -d /etc/systemd/system/kubelet.service.d/ ]; then
+            mkdir -p /etc/systemd/system/kubelet.service.d/
+          fi
+          cp "#{CONFIG_DIR}/10-kubeadm.conf" /etc/systemd/system/kubelet.service.d/
+        fi
         SHELL
+
 
     num_controlplane = 1 # at the moment, scripts only support 1
     num_workers      = 1
@@ -37,11 +50,13 @@ Vagrant.configure("2") do |config|
       # Add the Kubernetes apt signing key and repository
       curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
       echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
-      # Install kubelet, kubectl and docker
+      # Install kubelet, kubectl and docker (kubernetes-cni and cri-tools are deps of kubeadm)
       ${aptGet} update && ${aptGet} install -y \
         docker.io=#{apt_docker} \
         kubelet=#{apt_k8s} \
-        kubectl=#{apt_k8s}
+        kubectl=#{apt_k8s} \
+        kubernetes-cni \
+        cri-tools
       # Disable swap, it must not be used when Kubernetes is running
       swapoff -a
       sed -i /swap/d /etc/fstab
