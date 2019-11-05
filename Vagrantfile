@@ -1,5 +1,3 @@
-PATCHED_KUBEADM = "/home/vagrant/kubeadm/kubeadm"
-
 Vagrant.configure("2") do |config|
     config.vm.box = "bento/ubuntu-18.04"
   
@@ -17,8 +15,12 @@ Vagrant.configure("2") do |config|
         "/home/vagrant/kubeadm"
 
     config.vm.provision "shell", privileged: true, inline: <<-SHELL
-        if [ ! -d ${PATCHED_KUBEADM} ]; cp ${PATCHED_KUBEADM} /usr/local/bin; fi
+        set -ex
+        PATCHED_KUBEADM='/home/vagrant/kubeadm/kubeadm'
+        if [ -f ${PATCHED_KUBEADM} ]; then
+            cp ${PATCHED_KUBEADM} /usr/local/bin
             chmod a+x /usr/local/bin/kubeadm
+        fi
         SHELL
     
 
@@ -48,6 +50,7 @@ Vagrant.configure("2") do |config|
       # Pre-configure the kubelet to bind to eth1
       #   ref: https://github.com/kubernetes/kubeadm/issues/203#issuecomment-335416377
       eth1_ip=$(ifconfig eth1 | awk '$1 == "inet" {print $2}')
+      if [ ! -d /etc/systemd/system/kubelet.service.d/ ]; then mkdir -p /etc/systemd/system/kubelet.service.d/; fi
       echo "Environment=\"KUBELET_EXTRA_ARGS=--node-ip=${eth1_ip}\"" >> /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
       # Route the cluster CIDR via eth1
       #   ref: https://github.com/kubernetes/kubeadm/issues/102#issuecomment-291532883
