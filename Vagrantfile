@@ -20,7 +20,7 @@ Vagrant.configure("2") do |config|
         if [ ! -d ${PATCHED_KUBEADM} ]; cp ${PATCHED_KUBEADM} /usr/local/bin; fi
             chmod a+x /usr/local/bin/kubeadm
         SHELL
-    end
+    
 
     num_controlplane = 1 # at the moment, scripts only support 1
     num_workers      = 1
@@ -154,3 +154,6 @@ Vagrant.configure("2") do |config|
     end
   
   end
+
+  # expose 8080
+  # copy over kube config
