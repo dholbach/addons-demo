@@ -10,6 +10,7 @@ Vagrant.configure("2") do |config|
     apt_k8s    = "1.16.2-00"
     v_k8s      = "1.16.2"
 
+    # Make patch kubeadm available
     config.vm.synced_folder \
         "/home/daniel/go/src/github.com/kubernetes/kubernetes/bazel-bin/cmd/kubeadm/linux_amd64_pure_stripped", \
         "/home/vagrant/kubeadm"
@@ -22,7 +23,6 @@ Vagrant.configure("2") do |config|
             chmod a+x /usr/local/bin/kubeadm
         fi
         SHELL
-    
 
     num_controlplane = 1 # at the moment, scripts only support 1
     num_workers      = 1
@@ -78,7 +78,7 @@ Vagrant.configure("2") do |config|
       EOF
       # Init the cluster
       eth1_ip=$(ifconfig eth1 | awk '$1 == "inet" {print $2}')
-      stat $KUBECONFIG || kubeadm init \
+      stat $KUBECONFIG || kubeadm init --v=5  --feature-gates AddonInstaller=true \
         --kubernetes-version v#{v_k8s} \
         --apiserver-advertise-address "${eth1_ip}" \
         --pod-network-cidr 10.96.0.0/16 \
