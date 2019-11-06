@@ -12,6 +12,15 @@ sudo apt install -y kubectl
 snap install go --channel 1.12/stable --classic
 ```
 
+Use `kubeadm` with Addons installer:
+
+```sh
+mkdir -p $GOPATH/src/github.com/stealthybox
+git clone --single-branch --branch kubeadm-addon-installer https://github.com/stealthybox/kubernetes.git --depth 1
+cd $GOPATH/src/github.com/stealthybox/kubernetes
+GO111MODULE=on bazel build //cmd/kubeadm
+```
+
 Get `kinder`:
 
 ```sh
@@ -24,7 +33,7 @@ Build node image using our custom `kubeadm` build:
 
 ```sh
 kinder build node-variant \
-    --with-kubeadm ~/go/src/github.com/kubernetes/kubernetes/bazel-bin/cmd/kubeadm/linux_amd64_pure_stripped/kubeadm \
+    --with-kubeadm ~/go/src/github.com/stealthybox/kubernetes/bazel-bin/cmd/kubeadm/linux_amd64_pure_stripped/kubeadm \
     --base-image kindest/node:v1.16.2
 ```
 
