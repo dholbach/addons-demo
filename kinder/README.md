@@ -46,6 +46,6 @@ kinder do kubeadm-join
 Now you can access your cluster:
 
 ```sh
-export KUBECONFIG=~/.kube/kind-config-kind
-kubectl get all --all-namespaces
+export KUBECONFIG="$(kinder get kubeconfig-path --name="kind")"
+kubectl cluster-info
 ```
