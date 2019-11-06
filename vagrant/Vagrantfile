@@ -29,6 +29,9 @@ Vagrant.configure("2") do |config|
 
     # add some additional config and scripts
     config.vm.synced_folder "./vm-config", "#{v_HOME}/vm-config"
+    config.vm.synced_folder \
+        "../intel-device-plugins-for-kubernetes", \
+        "#{v_HOME}/intel-device-plugins-for-kubernetes"
 
     config.vm.provision "shell", privileged: true, inline: <<-SHELL
         set -ex
