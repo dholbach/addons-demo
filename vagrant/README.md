@@ -22,5 +22,5 @@ curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
 
 sudo apt-get update && sudo apt-get install bazel git snapd \
     vagrant virtualbox virtualbox-guest-dkms virtualbox-ext-pack
-snap install go/1.12
+snap install go --channel 1.12/stable --classic
 ```

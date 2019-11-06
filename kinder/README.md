@@ -9,7 +9,7 @@ echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/
 sudo apt update
 sudo apt install -y kubectl
 
-snap install go/1.12
+snap install go --channel 1.12/stable --classic
 ```
 
 Get `kinder`:
