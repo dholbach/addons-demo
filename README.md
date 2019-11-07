@@ -32,10 +32,13 @@ make intel-gpu-plugin
 
 ```sh
 export GOPATH=~/go/
-mkdir -p $GOPATH/src/github.com/stealthybox
-cd $GOPATH/src/github.com/stealthybox/
-git clone --single-branch --branch kubeadm-addon-installer https://github.com/stealthybox/kubernetes.git --depth 1
+mkdir -p $GOPATH/src/github.com/kubernetes
+cd $GOPATH/src/github.com/kubernetes/
+git clone --single-branch --branch release-1.16 https://github.com/kubernetes/kubernetes.git --depth 1
 cd kubernetes
+curl -s https://github.com/kubernetes/kubernetes/compare/master...stealthybox:kubeadm-addon-installer.diff -o addons.diff
+patch -p1 < addons.diff
+# XXX: fix patch to apply
 GO111MODULE=on bazel build //cmd/kubeadm
 ```
 
