@@ -14,13 +14,32 @@ EOF
 eth1_ip=$(ifconfig eth1 | awk '$1 == "inet" {print $2}')
 
 stat "$KUBECONFIG" || \
-kubeadm init phase kubeconfig all \
-    --token abcdef.0123456789abcdef \
+kubeadm config images pull && \
+kubeadm init phase preflight && \
+kubeadm init phase kubelet-start && \
+kubeadm init phase certs all \
     --kubernetes-version "${KUBE_VERSION}" \
     --apiserver-advertise-address "${eth1_ip}" && \
+kubeadm init phase kubeconfig all \
+    --kubernetes-version "${KUBE_VERSION}" \
+    --apiserver-advertise-address "${eth1_ip}" && \
+kubeadm init phase control-plane all && \
+kubeadm init phase etcd local && \
+kubeadm init phase upload-config all --v=5 && \
+kubeadm init phase upload-certs \
+    --kubernetes-version "${KUBE_VERSION}" \
+    --apiserver-advertise-address "${eth1_ip}" && \
+kubeadm init phase mark-control-plane \
+    --kubernetes-version "${KUBE_VERSION}" \
+    --apiserver-advertise-address "${eth1_ip}" && \
+kubeadm init phase bootstrap-token \
+    --kubernetes-version "${KUBE_VERSION}" \
+    --apiserver-advertise-address "${eth1_ip}" && \
+cd "${CONFIG_DIR}/cluster/" && kubeadm init phase addon installer \
+    --config "config.yaml" --v=5 && \
 kubeadm init phase addon installer --feature-gates AddonInstaller=true && \
-kubeadm init phase addon installer --config cluster/config.yaml && \
 kubeadm init --v=5 \
+    --token abcdef.0123456789abcdef \
     --pod-network-cidr 10.96.0.0/16
 
 

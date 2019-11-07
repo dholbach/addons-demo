@@ -1,4 +1,13 @@
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: InitConfiguration
+---
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+kubernetesVersion: 1.16.2
+featureGates:
+  AddonInstaller: true
+---
 apiVersion: addons.config.k8s.io/v1alpha1
 kind: AddonInstallerConfiguration
 addons:
-- gpu-addon.yaml
+- ../addon/
