@@ -10,165 +10,31 @@ Vagrant.configure("2") do |config|
     config.cache.scope = :box
   end
 
-
-  apt_docker      = "18.09.7-0ubuntu1~18.04.4"
-  apt_k8s         = "1.16.2-00"
-  v_k8s           = "1.16.2"
   v_HOME          = "/home/vagrant"
-  PATCHED_KUBEADM = "#{v_HOME}/kubeadm/kubeadm"
-  CONFIG_DIR      = "#{v_HOME}/vm-config"
+  v_CONFIG        = "#{v_HOME}/vm-config"
+  SCRIPT_DIR      = File.expand_path("./vm-config/")
 
   # Make patch kubeadm available
   config.vm.synced_folder \
-      "~/go/src/github.com/kubernetes/kubernetes/bazel-bin/cmd/kubeadm/linux_amd64_pure_stripped", \
-      "#{v_HOME}/kubeadm"
+    "~/go/src/github.com/kubernetes/kubernetes/bazel-bin/cmd/kubeadm/linux_amd64_pure_stripped", \
+    "#{v_HOME}/kubeadm"
 
   # add some additional config and scripts
-  config.vm.synced_folder "./vm-config", "#{v_HOME}/vm-config"
+  config.vm.synced_folder "./vm-config", v_CONFIG
   config.vm.synced_folder \
-      "../intel-device-plugins-for-kubernetes", \
-      "#{v_HOME}/intel-device-plugins-for-kubernetes"
+    "../intel-device-plugins-for-kubernetes", \
+    "#{v_HOME}/intel-device-plugins-for-kubernetes"
 
-  config.vm.provision "shell", privileged: true, inline: <<-SHELL
-      set -ex
-      if [ -f #{PATCHED_KUBEADM} ]; then
-          cp #{PATCHED_KUBEADM} /usr/local/bin
-          chmod a+x /usr/local/bin/kubeadm
-      fi
-
-      if [ -f "#{CONFIG_DIR}/10-kubeadm.conf" ]; then
-        if [ ! -d /etc/systemd/system/kubelet.service.d/ ]; then
-          mkdir -p /etc/systemd/system/kubelet.service.d/
-        fi
-        cp "#{CONFIG_DIR}/10-kubeadm.conf" /etc/systemd/system/kubelet.service.d/
-      fi
-      apt install -y docker.io
-      SHELL
-
+  config.vm.provision "shell", privileged: true, path: "#{SCRIPT_DIR}/vm-prep.sh"
 
   num_controlplane = 1 # at the moment, scripts only support 1
   num_workers      = 1
-
-  install = <<~SHELL
-    set -ex
-    export DEBIAN_FRONTEND=noninteractive
-    aptGet='apt-get -q'
-    # Make sure curl and apt SSL support is available
-    ${aptGet} update && ${aptGet} install -y apt-transport-https curl
-
-    # Add the Kubernetes apt signing key and repository
-    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-    echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
-    # Install kubelet, kubectl and docker (kubernetes-cni and cri-tools are deps of kubeadm)
-    ${aptGet} update && ${aptGet} install -y \
-      docker.io=#{apt_docker} \
-      kubelet=#{apt_k8s} \
-      kubectl=#{apt_k8s} \
-      kubernetes-cni \
-      cri-tools
-    # Disable swap, it must not be used when Kubernetes is running
-    swapoff -a
-    sed -i /swap/d /etc/fstab
-    # Enable the docker systemd service
-    systemctl enable docker.service
-    # Pre-configure the kubelet to bind to eth1
-    #   ref: https://github.com/kubernetes/kubeadm/issues/203#issuecomment-335416377
-    eth1_ip=$(ifconfig eth1 | awk '$1 == "inet" {print $2}')
-    if [ ! -d /etc/systemd/system/kubelet.service.d/ ]; then mkdir -p /etc/systemd/system/kubelet.service.d/; fi
-    echo "Environment=\"KUBELET_EXTRA_ARGS=--node-ip=${eth1_ip}\"" >> /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-    # Route the cluster CIDR via eth1
-    #   ref: https://github.com/kubernetes/kubeadm/issues/102#issuecomment-291532883
-    cat << EOF > /etc/netplan/90-k8s-services-eth1.yaml
-    ---
-    network:
-      version: 2
-      ethernets:
-        eth1:
-          routes:
-          - to: 10.96.0.0/16
-            via: 0.0.0.0
-    EOF
-    netplan apply
-  SHELL
-
-  kubeadm_init = <<~SHELL
-    set -ex
-    # Configure kubectl for the kubeadm kubeconfig
-    export KUBECONFIG=/etc/kubernetes/admin.conf
-    cat << EOF >> /etc/bash.bashrc
-      export KUBECONFIG=/etc/kubernetes/admin.conf
-      alias k="kubectl"
-      alias ks="kubectl -n kube-system"
-    EOF
-    # Init the cluster
-    #  --feature-gates AddonInstaller=true
-    eth1_ip=$(ifconfig eth1 | awk '$1 == "inet" {print $2}')
-    stat $KUBECONFIG || kubeadm init --v=5 \
-      --kubernetes-version v#{v_k8s} \
-      --apiserver-advertise-address "${eth1_ip}" \
-      --pod-network-cidr 10.96.0.0/16 \
-      --token abcdef.0123456789abcdef
-    # Install Weave Net as the Pod networking solution
-    # Workaround  https://github.com/weaveworks/weave/issues/3700
-    ### kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 -w0)"
-    kubectl apply -f "https://raw.githubusercontent.com/weaveworks/weave/master/prog/weave-kube/weave-daemonset-k8s-1.9.yaml"
-    # Make this control plane node able to run normal workloads
-    kubectl taint nodes --all node-role.kubernetes.io/master- || true # fails if already untainted
-  SHELL
-
-  kubeadm_join_async = <<~SHELL
-    set -ex
-    # Join the cluster asynchronously
-    nohup sh -c "
-      until kubeadm join \\
-        --token abcdef.0123456789abcdef \\
-        --discovery-token-unsafe-skip-ca-verification \\
-        192.168.5.#{10 + 1}:6443
-      do sleep 2
-      done
-    " >> /var/log/kubeadm_join_async.log 2>&1 & disown
-  SHELL
-
-  check = <<~SHELL
-    set -ex
-    echo "Waiting for all nodes to join..."
-    export KUBECONFIG=/etc/kubernetes/admin.conf
-    num_expected="#{ [0,num_controlplane].max + [0,num_workers].max }"
-    if timeout 300 sh -c "
-        until kubectl get nodes -oname | wc -l | grep "^$num_expected$"
-        do echo -n .; sleep 2
-        done
-      "
-    then echo "All nodes joined the cluster"
-    else echo "Timed out waiting for all nodes to join the cluster" 1>&2 && exit 1
-    fi
-    echo "Waiting for all nodes to be ready..."
-    if timeout 100 sh -c "
-        while kubectl get nodes | grep NotReady
-        do echo -n .; sleep 2
-        done
-      "
-    then echo "All nodes are now Ready"
-    else echo "Timed out waiting for all nodes to become Ready" 1>&2 && exit 2
-    fi
-    echo "Waiting for all pods to run..."
-    if timeout 100 sh -c "
-        while kubectl get pods --all-namespaces | grep ContainerCreating
-        do echo -n .; sleep 2
-        done
-      "
-    then echo "All pods are now running"
-    else echo "Timed out waiting for all pods to run" 1>&2 && exit 2
-    fi
-  SHELL
-
-  #config.vm.provision "shell", inline: install
 
   (1..num_workers).each do |i|
     config.vm.define "worker-#{i}" do |worker|
       worker.vm.hostname = "worker-#{i}"
       worker.vm.network "private_network", ip: "192.168.5.#{100 + i}"
-      #worker.vm.provision "shell", inline: kubeadm_join_async
+      worker.vm.provision "shell", path: "#{SCRIPT_DIR}/kubeadm-join.sh"
     end
   end
 
@@ -176,8 +42,8 @@ Vagrant.configure("2") do |config|
     config.vm.define "controlplane-#{i}" do |controlplane|
       controlplane.vm.hostname = "controlplane-#{i}"
       controlplane.vm.network "private_network", ip: "192.168.5.#{10 + i}"
-      #controlplane.vm.provision "shell", inline: kubeadm_init
-      #controlplane.vm.provision "shell", inline: check
+      controlplane.vm.provision "shell", path: "#{SCRIPT_DIR}/kubeadm-init.sh"
+      controlplane.vm.provision "shell", path: "#{SCRIPT_DIR}/cluster-check.sh"
     end
   end
 end
