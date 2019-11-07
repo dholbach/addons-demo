@@ -6,17 +6,13 @@ First make sure you have go 1.12, git and bazel installed. We'll assume
 you run Ubuntu or Debian here for simplicity:
 
 ```sh
-sudo apt install -y apt-transport-https git snapd curl
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+sudo apt install -y apt-transport-https git snapd curl make docker.io
+snap install go --channel 1.12/stable --classic
 
 echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
 curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
-
 sudo apt update
-sudo apt install -y kubectl bazel
-
-snap install go --channel 1.12/stable --classic
+sudo apt install -y bazel
 ```
 
 Then get the source of this repo:
