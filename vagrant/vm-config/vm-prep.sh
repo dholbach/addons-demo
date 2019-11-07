@@ -12,6 +12,9 @@ export DEBIAN_FRONTEND="noninteractive"
 if [ -f "$PATCHED_KUBEADM" ]; then
     cp "$PATCHED_KUBEADM" /usr/local/bin
     chmod a+x /usr/local/bin/kubeadm
+else
+    echo "kubeadm not found."
+    exit 1
 fi
 
 if [ -f "$CONFIG_DIR/10-kubeadm.conf" ]; then
@@ -19,6 +22,9 @@ if [ -f "$CONFIG_DIR/10-kubeadm.conf" ]; then
         mkdir -p /etc/systemd/system/kubelet.service.d/
     fi
     cp "$CONFIG_DIR/10-kubeadm.conf" /etc/systemd/system/kubelet.service.d/
+else
+    echo "kubeadm.conf not found."
+    exit 1
 fi
 
 apt='apt-get -q'
