@@ -2,13 +2,7 @@
 
 ## Prep
 
-Get the source of this repo first:
-
-```sh
-git clone --recurse-submodules https://github.com/dholbach/gpu-demo
-```
-
-Then make sure you have, go 1.12, git and bazel installed. We'll assume
+First make sure you have go 1.12, git and bazel installed. We'll assume
 you run Ubuntu or Debian here for simplicity:
 
 ```sh
@@ -23,6 +17,12 @@ sudo apt update
 sudo apt install -y kubectl bazel
 
 snap install go --channel 1.12/stable --classic
+```
+
+Then get the source of this repo:
+
+```sh
+git clone --recurse-submodules https://github.com/dholbach/gpu-demo
 ```
 
 ## Build `kubeadm` with Addons installer
