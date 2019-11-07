@@ -45,4 +45,4 @@ GO111MODULE=on bazel build //cmd/kubeadm
 
 ## Start up cluster
 
-Use [kinder](./kinder/).
+Use [vagrant](./vagrant/).
