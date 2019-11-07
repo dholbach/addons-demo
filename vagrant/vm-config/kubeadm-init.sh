@@ -26,7 +26,7 @@ kubeadm init phase kubeconfig all \
     --apiserver-advertise-address "${eth1_ip}" && \
 kubeadm init phase control-plane all && \
 kubeadm init phase etcd local && \
-kubeadm init phase upload-certs --upload-certs &&\
+kubeadm init phase upload-certs --upload-certs --v=5 &&\
 kubeadm init phase mark-control-plane && \
 cd "${CONFIG_DIR}/cluster/" && kubeadm init phase addon installer \
     --config "config.yaml" --v=5 && \
@@ -34,7 +34,10 @@ kubeadm init phase upload-config all --v=5 && \
 kubeadm init \
     --skip-phases preflight,kubelet-start,certs,kubeconfig,control-plane,etcd,upload-certs,mark-control-plane,addon,upload-config \
     --token abcdef.0123456789abcdef \
-    --pod-network-cidr "${POD_NETWORK_CIDR}"
+    --pod-network-cidr "${POD_NETWORK_CIDR}" && \
+kubeadm init phase addon kube-proxy \
+    --apiserver-advertise-address "${eth1_ip}" --v=5 && \
+kubeadm init phase addon coredns
 
 
 # Install Weave Net as the Pod networking solution
