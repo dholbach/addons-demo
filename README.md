@@ -25,6 +25,13 @@ Then get the source of this repo:
 git clone --recurse-submodules https://github.com/dholbach/gpu-demo
 ```
 
+Now build the gpu plugin:
+
+```sh
+cd gpu-demo/intel-device-plugins-for-kubernetes
+make intel-gpu-plugin
+```
+
 ## Build `kubeadm` with Addons installer
 
 ```sh
