@@ -1,31 +1,5 @@
 # gpu-demo using kinder
 
-Prep:
-
-```sh
-sudo apt install -y apt-transport-https git snapd
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
-
-echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-sudo apt-get install curl
-curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
-
-sudo apt update
-sudo apt install -y kubectl bazel
-
-snap install go --channel 1.12/stable --classic
-```
-
-Use `kubeadm` with Addons installer:
-
-```sh
-mkdir -p $GOPATH/src/github.com/stealthybox
-git clone --single-branch --branch kubeadm-addon-installer https://github.com/stealthybox/kubernetes.git --depth 1
-cd $GOPATH/src/github.com/stealthybox/kubernetes
-GO111MODULE=on bazel build //cmd/kubeadm
-```
-
 Get `kinder`:
 
 ```sh
