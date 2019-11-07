@@ -33,7 +33,7 @@ Vagrant.configure("2") do |config|
   kubeadm_join_async = <<~SHELL
     set -ex
     # Join the cluster asynchronously
-    source "#{SCRIPT_DIR}/common.sh"
+    source "#{v_CONFIG}/common.sh"
     nohup sh -c "
       until kubeadm join \\
         --token abcdef.0123456789abcdef \\

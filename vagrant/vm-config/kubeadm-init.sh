@@ -25,14 +25,13 @@ kubeadm init phase kubeconfig all \
     --apiserver-advertise-address "${eth1_ip}" && \
 kubeadm init phase control-plane all && \
 kubeadm init phase etcd local && \
-kubeadm init phase upload-certs &&\
+kubeadm init phase upload-certs --upload-certs &&\
 kubeadm init phase mark-control-plane && \
-kubeadm init phase bootstrap-token && \
-kubeadm init phase addon installer --feature-gates AddonInstaller=true && \
 cd "${CONFIG_DIR}/cluster/" && kubeadm init phase addon installer \
     --config "config.yaml" --v=5 && \
 kubeadm init phase upload-config all --v=5 && \
-kubeadm init --v=5 \
+kubeadm init \
+    --skip-phases preflight,kubelet-start,certs,kubeconfig,control-plane,etcd,upload-certs,mark-control-plane,addon,upload-config \
     --token abcdef.0123456789abcdef \
     --pod-network-cidr 10.96.0.0/16
 
