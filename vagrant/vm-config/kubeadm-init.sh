@@ -5,11 +5,7 @@ set -ex
 # shellcheck source=/dev/null
 . "./vm-config/common.sh"
 
-# Configure kubectl for the kubeadm kubeconfig
-export KUBECONFIG=/etc/kubernetes/admin.conf
-
 cat << EOF >> /etc/bash.bashrc
-export KUBECONFIG=/etc/kubernetes/admin.conf
 alias k="kubectl"
 alias ks="kubectl -n kube-system"
 EOF
@@ -17,14 +13,16 @@ EOF
 # Init the cluster
 eth1_ip=$(ifconfig eth1 | awk '$1 == "inet" {print $2}')
 
-stat $KUBECONFIG || \
+stat "$KUBECONFIG" || \
+kubeadm init phase kubeconfig all \
+    --token abcdef.0123456789abcdef \
+    --kubernetes-version "${KUBE_VERSION}" \
+    --apiserver-advertise-address "${eth1_ip}" && \
 kubeadm init phase addon installer --feature-gates AddonInstaller=true && \
 kubeadm init phase addon installer --config cluster/config.yaml && \
 kubeadm init --v=5 \
---kubernetes-version "${KUBE_VERSION}" \
---apiserver-advertise-address "${eth1_ip}" \
---pod-network-cidr 10.96.0.0/16 \
---token abcdef.0123456789abcdef
+    --pod-network-cidr 10.96.0.0/16
+
 
 # Install Weave Net as the Pod networking solution
 # Workaround  https://github.com/weaveworks/weave/issues/3700
