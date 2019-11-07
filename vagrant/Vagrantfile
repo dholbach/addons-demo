@@ -16,7 +16,7 @@ Vagrant.configure("2") do |config|
 
   # Make patch kubeadm available
   config.vm.synced_folder \
-    "~/go/src/github.com/kubernetes/kubernetes/bazel-bin/cmd/kubeadm/linux_amd64_pure_stripped", \
+    "~/go/src/github.com/stealthybox/kubernetes/bazel-bin/cmd/kubeadm/linux_amd64_pure_stripped", \
     "#{v_HOME}/kubeadm"
 
   # add some additional config and scripts
