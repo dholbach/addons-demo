@@ -34,8 +34,9 @@ make intel-gpu-plugin
 export GOPATH=~/go/
 mkdir -p $GOPATH/src/github.com/kubernetes
 cd $GOPATH/src/github.com/kubernetes/
-git clone --single-branch --branch release-1.16 https://github.com/kubernetes/kubernetes.git --depth 1
+git clone https://github.com/kubernetes/kubernetes.git
 cd kubernetes
+git checkout v1.16.2
 curl -s https://github.com/kubernetes/kubernetes/compare/master...stealthybox:kubeadm-addon-installer.diff -o addons.diff
 patch -p1 < addons.diff
 # XXX: fix patch to apply
