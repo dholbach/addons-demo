@@ -64,7 +64,7 @@ network:
   ethernets:
     eth1:
       routes:
-        - to: 10.96.0.0/16
+        - to: ${POD_NETWORK_CIDR}
           via: 0.0.0.0
 EOF
 netplan apply

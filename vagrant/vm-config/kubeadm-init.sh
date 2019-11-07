@@ -6,6 +6,7 @@ set -ex
 . "./vm-config/common.sh"
 
 cat << EOF >> /etc/bash.bashrc
+export KUBECONFIG=/etc/kubernetes/admin.conf
 alias k="kubectl"
 alias ks="kubectl -n kube-system"
 EOF
@@ -33,7 +34,7 @@ kubeadm init phase upload-config all --v=5 && \
 kubeadm init \
     --skip-phases preflight,kubelet-start,certs,kubeconfig,control-plane,etcd,upload-certs,mark-control-plane,addon,upload-config \
     --token abcdef.0123456789abcdef \
-    --pod-network-cidr 10.96.0.0/16
+    --pod-network-cidr "${POD_NETWORK_CIDR}"
 
 
 # Install Weave Net as the Pod networking solution
