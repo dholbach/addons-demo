@@ -13,7 +13,7 @@ echo "Waiting for all nodes to join..."
 NUM_EXPECTED="$(echo "$NUM_CONTROLPLANE+$NUM_WORKERS" | bc)"
 
 if timeout 300 sh -c "
-    until kubectl get nodes -oname | wc -l | grep -e $NUM_EXPECTED
+    until kubectl get nodes -oname | wc -l | grep ^$NUM_EXPECTED$
     do echo -n .; sleep 2
     done
     "
