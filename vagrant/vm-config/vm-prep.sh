@@ -30,7 +30,8 @@ fi
 apt='apt-get -q'
 
 # Make sure curl and apt SSL support is available
-${apt} update && ${apt} install -y apt-transport-https curl
+${apt} update && ${apt} install -y apt-transport-https curl git \
+    docker.io="$apt_docker"
 
 # Add the Kubernetes apt signing key and repository
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
@@ -39,8 +40,7 @@ echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.l
 # Install kubelet, kubectl and docker (kubernetes-cni and cri-tools are deps of kubeadm)
 ${apt} update && \
 ${apt} install -y \
-    docker.io="$apt_docker" kubelet="$apt_k8s" \
-    kubectl="$apt_k8s" kubernetes-cni cri-tools
+    kubelet="$apt_k8s" kubectl="$apt_k8s" kubernetes-cni cri-tools
 
 # Disable swap, it must not be used when Kubernetes is running
 swapoff -a
