@@ -17,7 +17,10 @@ EOF
 # Init the cluster
 eth1_ip=$(ifconfig eth1 | awk '$1 == "inet" {print $2}')
 
-stat $KUBECONFIG || kubeadm init --v=5  --feature-gates AddonInstaller=true \
+stat $KUBECONFIG || \
+kubeadm init phase addon installer --feature-gates AddonInstaller=true && \
+kubeadm init phase addon installer --config cluster/config.yaml && \
+kubeadm init --v=5 \
 --kubernetes-version "${KUBE_VERSION}" \
 --apiserver-advertise-address "${eth1_ip}" \
 --pod-network-cidr 10.96.0.0/16 \
