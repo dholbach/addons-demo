@@ -32,7 +32,8 @@ cd "${CONFIG_DIR}/cluster/" && kubeadm init phase addon installer \
     --config "config.yaml" --v=5 && \
 kubeadm init phase upload-config all --v=5 && \
 kubeadm init phase addon kube-proxy \
-    --apiserver-advertise-address "${eth1_ip}" --v=5 && \
+    --apiserver-advertise-address "${eth1_ip}" --v=5 \
+    --pod-network-cidr "${POD_NETWORK_CIDR}" && \
 kubeadm init phase addon coredns
 kubeadm init \
     --skip-phases preflight,kubelet-start,certs,kubeconfig,control-plane,etcd,upload-certs,mark-control-plane,addon,upload-config \
