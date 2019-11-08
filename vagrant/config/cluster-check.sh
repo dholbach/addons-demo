@@ -3,7 +3,7 @@
 set -ex
 
 # shellcheck source=/dev/null
-. "./common.sh"
+. "./config/common.sh"
 
 export NUM_CONTROLPLANE=1
 export NUM_WORKERS=1
