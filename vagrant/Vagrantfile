@@ -36,10 +36,10 @@ Vagrant.configure("2") do |config|
   kubeadm_join_async = <<~SHELL
     set -ex
     # Join the cluster asynchronously
-    source #{L_CONFIG}"/common.sh"
+    source #{v_CONFIG}"/common.sh"
     nohup sh -c "
       until kubeadm join \\
-        --token ${TOKEN}" \\
+        --token ${TOKEN} \\
         --discovery-token-unsafe-skip-ca-verification \\
         192.168.5.#{10 + 1}:6443
       do sleep 2
