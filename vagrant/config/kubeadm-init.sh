@@ -4,37 +4,37 @@ set -ex
 
 if [ "$(pwd)" != "$(realpath $(dirname $0))" ]; then
     echo "$(realpath $(dirname $0))"
-    echo "cd into ./vm-config please"
+    echo "cd into $(dirname $0) please"
     exit 1
 fi
 
 # shellcheck source=/dev/null
 . "./common.sh"
 
+export KUBECONFIG="/etc/kubernetes/admin.conf"
+
 cat << EOF >> /etc/bash.bashrc
-export KUBECONFIG=/etc/kubernetes/admin.conf
+export KUBECONFIG=${KUBECONFIG}
 alias k="kubectl"
 alias ks="kubectl -n kube-system"
 EOF
 
-export CLUSTER_CONFIG="$CONFIG_DIR/cluster/config.yaml"
+export CLUSTER_CONFIG="$V_HOME/cluster/config.yaml"
 CIDR_ESCAPE=$(echo "${POD_NETWORK_CIDR}" | sed -e 's/[\/&]/\\&/g')
 export CIDR_ESCAPE
 
 # Init the cluster
 eth1_ip=$(ifconfig eth1 | awk '$1 == "inet" {print $2}')
 
-stat "$KUBECONFIG" || \
+sed "s/ETH1_IP/${eth1_ip}/g;
+     s/POD_NETWORK_CIDR/${CIDR_ESCAPE}/g;
+     s/TOKEN/${TOKEN}/g;" \
+    "$CLUSTER_CONFIG".template > "$CLUSTER_CONFIG"
 
-kubeadm init --ignore-preflight-errors=all \
-    --config=<(sed "s/ETH1_IP/${eth1_ip}/g;
-                    s/POD_NETWORK_CIDR/${CIDR_ESCAPE}/g" "$CLUSTER_CONFIG")
-kubeadm init phase addon kube-proxy --config=<(sed "s/ETH1_IP/${eth1_ip}/g;
-                    s/POD_NETWORK_CIDR/${CIDR_ESCAPE}/g;
-                    /AddonInstaller:/d" "$CLUSTER_CONFIG")
-kubeadm init phase addon coredns --config=<(sed "s/ETH1_IP/${eth1_ip}/g;
-                    s/POD_NETWORK_CIDR/${CIDR_ESCAPE}/g;
-                    /AddonInstaller:/d" "$CLUSTER_CONFIG")
+stat "$KUBECONFIG" || \
+kubeadm init --ignore-preflight-errors=all --config="$CLUSTER_CONFIG"
+kubeadm init phase addon kube-proxy --config=<(sed "/AddonInstaller:/d" "$CLUSTER_CONFIG")
+kubeadm init phase addon coredns --config=<(sed "/AddonInstaller:/d" "$CLUSTER_CONFIG")
 
 # Install Weave Net as the Pod networking solution
 # Workaround  https://github.com/weaveworks/weave/issues/3700

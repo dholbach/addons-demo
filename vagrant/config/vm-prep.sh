@@ -3,8 +3,9 @@
 set -ex
 
 # shellcheck source=/dev/null
-. "./vm-config/common.sh"
+. "./config/common.sh"
 
+export PATCHED_KUBEADM="$V_HOME/kubeadm/kubeadm"
 export apt_docker="18.09.7-0ubuntu1~18.04.4"
 export apt_k8s="1.16.2-00"
 export DEBIAN_FRONTEND="noninteractive"
