@@ -33,10 +33,14 @@ cluster](https://github.com/dholbach/gpu-demo/blob/master/vagrant/config/kubeadm
 
 > Note: the relevant commands to bring up the cluster can be seen
 > [here](https://github.com/dholbach/gpu-demo/blob/master/vagrant/config/kubeadm-init.sh#L27-L29).
-> 
+>
 > All that is required to bring up the cluster is a [simple cluster
 > config](https://github.com/dholbach/gpu-demo/blob/master/vagrant/cluster/config.yaml.template)
 > that is passed to `kubeadm`.
+>
+> Here are the [addon related
+> config](https://github.com/dholbach/gpu-demo/blob/master/vagrant/cluster/config.yaml.template#L19-L22)
+> bits.
 
 ## Checking in on the cluster
 
