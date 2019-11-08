@@ -2,12 +2,12 @@
 
 ## Prep
 
-First make sure you have go 1.12, git and bazel installed. We'll assume
+First make sure you have go 1.13, git and bazel installed. We'll assume
 you run Ubuntu or Debian here for simplicity:
 
 ```sh
 sudo apt install -y apt-transport-https git snapd curl make docker.io
-snap install go --channel 1.12/stable --classic
+snap install go --channel 1.13/stable --classic
 
 echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
 curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -

@@ -15,7 +15,7 @@ hcloud server create --image=ubuntu-18.04 --name=worker-1 --type=cx11
 
 ```sh
 apt install make docker.io linux-image-generic
-snap install go --channel 1.12/stable --classic
+snap install go --channel 1.13/stable --classic
 reboot
 git clone https://github.com/intel/intel-device-plugins-for-kubernetes
 cd intel-device-plugins-for-kubernetes
