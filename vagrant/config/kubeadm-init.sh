@@ -11,12 +11,6 @@ fi
 # shellcheck source=/dev/null
 . "./common.sh"
 
-cat << EOF >> /etc/bash.bashrc
-export KUBECONFIG=${KUBECONFIG}
-alias k="kubectl"
-alias ks="kubectl -n kube-system"
-EOF
-
 export CLUSTER_CONFIG="$V_HOME/cluster/config.yaml"
 CIDR_ESCAPE=$(echo "${POD_NETWORK_CIDR}" | sed -e 's/[\/&]/\\&/g')
 export CIDR_ESCAPE

@@ -10,6 +10,12 @@ export apt_docker="18.09.7-0ubuntu1~18.04.4"
 export apt_k8s="1.16.2-00"
 export DEBIAN_FRONTEND="noninteractive"
 
+cat << EOF >> /etc/bash.bashrc
+export KUBECONFIG=${KUBECONFIG}
+alias k="kubectl"
+alias ks="kubectl -n kube-system"
+EOF
+
 if [ -f "$PATCHED_KUBEADM" ]; then
     cp "$PATCHED_KUBEADM" /usr/local/bin
     chmod a+x /usr/local/bin/kubeadm
