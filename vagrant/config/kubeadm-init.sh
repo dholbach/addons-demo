@@ -11,8 +11,6 @@ fi
 # shellcheck source=/dev/null
 . "./common.sh"
 
-export KUBECONFIG="/etc/kubernetes/admin.conf"
-
 cat << EOF >> /etc/bash.bashrc
 export KUBECONFIG=${KUBECONFIG}
 alias k="kubectl"
