@@ -34,7 +34,7 @@ make intel-gpu-plugin
 export GOPATH=~/go/
 mkdir -p $GOPATH/src/github.com/kubernetes
 cd $GOPATH/src/github.com/kubernetes/
-git clone --single-branch --branch 1.16.2-plus-kubeadm-addon-installer https://github.com/dholbach/kubernetes.git --depth 2
+git clone --single-branch --branch kubeadm-addon-installer https://github.com/stealthybox/kubernetes.git --depth 2
 GO111MODULE=on bazel build //cmd/kubeadm
 ```
 
