@@ -20,7 +20,7 @@ vagrant up
 
 First of all, `vagrant` will bring up two VMs using `VirtualBox`, it will
 install a whole raft of dependencies and make scripts, config and our build
-of `kubeadm` and the GPU plugin available in the VMs, the networking is
+of `kubeadm` and the GPU plugin available in the VMs, the network is
 configured as well.
 
 Relevant code:
