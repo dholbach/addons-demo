@@ -1,9 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
 set -ex
 
+if [ "$(pwd)" != "$(realpath $(dirname $0))" ]; then
+    echo "$(realpath $(dirname $0))"
+    echo "cd into ./vm-config please"
+    exit 1
+fi
+
 # shellcheck source=/dev/null
-. "./vm-config/common.sh"
+. "./common.sh"
 
 cat << EOF >> /etc/bash.bashrc
 export KUBECONFIG=/etc/kubernetes/admin.conf
@@ -11,35 +17,24 @@ alias k="kubectl"
 alias ks="kubectl -n kube-system"
 EOF
 
+export CLUSTER_CONFIG="$CONFIG_DIR/cluster/config.yaml"
+CIDR_ESCAPE=$(echo "${POD_NETWORK_CIDR}" | sed -e 's/[\/&]/\\&/g')
+export CIDR_ESCAPE
+
 # Init the cluster
 eth1_ip=$(ifconfig eth1 | awk '$1 == "inet" {print $2}')
 
 stat "$KUBECONFIG" || \
-kubeadm config images pull && \
-kubeadm init phase preflight && \
-kubeadm init phase kubelet-start && \
-kubeadm init phase certs all \
-    --kubernetes-version "${KUBE_VERSION}" \
-    --apiserver-advertise-address "${eth1_ip}" && \
-kubeadm init phase kubeconfig all \
-    --kubernetes-version "${KUBE_VERSION}" \
-    --apiserver-advertise-address "${eth1_ip}" && \
-kubeadm init phase control-plane all && \
-kubeadm init phase etcd local && \
-kubeadm init phase upload-certs --upload-certs --v=5 &&\
-kubeadm init phase mark-control-plane && \
-cd "${CONFIG_DIR}/cluster/" && kubeadm init phase addon installer \
-    --config "config.yaml" --v=5 && \
-kubeadm init phase upload-config all --v=5 && \
-kubeadm init phase addon kube-proxy \
-    --apiserver-advertise-address "${eth1_ip}" --v=5 \
-    --pod-network-cidr "${POD_NETWORK_CIDR}" && \
-kubeadm init phase addon coredns
-kubeadm init \
-    --skip-phases preflight,kubelet-start,certs,kubeconfig,control-plane,etcd,upload-certs,mark-control-plane,addon,upload-config \
-    --token abcdef.0123456789abcdef \
-    --pod-network-cidr "${POD_NETWORK_CIDR}" && \
 
+kubeadm init --ignore-preflight-errors=all \
+    --config=<(sed "s/ETH1_IP/${eth1_ip}/g;
+                    s/POD_NETWORK_CIDR/${CIDR_ESCAPE}/g" "$CLUSTER_CONFIG")
+kubeadm init phase addon kube-proxy --config=<(sed "s/ETH1_IP/${eth1_ip}/g;
+                    s/POD_NETWORK_CIDR/${CIDR_ESCAPE}/g;
+                    /AddonInstaller:/d" "$CLUSTER_CONFIG")
+kubeadm init phase addon coredns --config=<(sed "s/ETH1_IP/${eth1_ip}/g;
+                    s/POD_NETWORK_CIDR/${CIDR_ESCAPE}/g;
+                    /AddonInstaller:/d" "$CLUSTER_CONFIG")
 
 # Install Weave Net as the Pod networking solution
 # Workaround  https://github.com/weaveworks/weave/issues/3700

@@ -1,13 +1,22 @@
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: InitConfiguration
+bootstrapTokens:
+- token: "abcdef.0123456789abcdef"
+  description: "kubeadm bootstrap token"
+  ttl: "24h"
+localAPIEndpoint:
+  advertiseAddress: "ETH1_IP"
+  bindPort: 6443
 ---
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
 kubernetesVersion: 1.16.2
+networking:
+  podSubnet: "POD_NETWORK_CIDR"
 featureGates:
   AddonInstaller: true
 ---
 apiVersion: addons.config.k8s.io/v1alpha1
 kind: AddonInstallerConfiguration
 addons:
-- ../addon/
+- addon/
