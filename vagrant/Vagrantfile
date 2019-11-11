@@ -24,9 +24,6 @@ Vagrant.configure("2") do |config|
   # add some additional config and scripts
   config.vm.synced_folder "#{LOCAL_DIR}/cluster", v_CLUSTER
   config.vm.synced_folder "#{LOCAL_DIR}/config", v_CONFIG
-  config.vm.synced_folder \
-    "../intel-device-plugins-for-kubernetes", \
-    "#{v_CLUSTER}/addon/intel-device-plugins-for-kubernetes"
 
   config.vm.provision "shell", privileged: true, path: "#{L_CONFIG}/vm-prep.sh"
 
