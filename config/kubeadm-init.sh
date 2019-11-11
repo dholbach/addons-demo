@@ -2,6 +2,12 @@
 
 set -ex
 
+if [ "$(pwd)" != "$(realpath $(dirname $0))" ]; then
+    echo "$(realpath $(dirname $0))"
+    echo "cd into $(dirname $0) please"
+    exit 1
+fi
+
 # shellcheck source=/dev/null
 . "./common.sh"
 
@@ -21,6 +27,7 @@ stat "$KUBECONFIG" || \
 kubeadm init --ignore-preflight-errors=all --config="$CLUSTER_CONFIG" && \
 kubeadm init phase addon kube-proxy --config=<(sed "/AddonInstaller:/d" "$CLUSTER_CONFIG") && \
 kubeadm init phase addon coredns --config=<(sed "/AddonInstaller:/d" "$CLUSTER_CONFIG")
+
 
 # Make this control plane node able to run normal workloads
 kubectl taint nodes --all node-role.kubernetes.io/master- || true # fails if already untainted
