@@ -45,7 +45,8 @@ sudo apt install -y bazel
 
 ## Build `kubeadm` with Addons installer
 
-We are going to build a branch of `kubeadm`, which adds support for addons.
+We are going to build a [branch of `kubeadm`, which adds support for
+addons](https://github.com/kubernetes/kubernetes/pull/85224).
 How this can be used is described in [the KEP](https://github.com/stealthybox/enhancements/blob/20191013-install-addons-via-kubeadm/keps/sig-cluster-lifecycle/addons/20191013-install-addons-via-kubeadm.md#user-stories).
 
 ```sh
