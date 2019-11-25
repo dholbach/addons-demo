@@ -19,6 +19,8 @@ featureGates:
 apiVersion: addons.config.x-k8s.io/v1alpha1
 kind: AddonInstallerConfiguration
 addons:
+- name: kube-proxy
+  kustomizeRef: github.com/johnsonj/addon-operators//config/crd?ref=kubeproxy
 - name: gpu-plugin
   kustomizeRef: github.com/dholbach/intel-device-plugins-for-kubernetes//deployments/gpu_plugin/
 - name: weave-net
