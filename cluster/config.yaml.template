@@ -16,8 +16,10 @@ networking:
 featureGates:
   AddonInstaller: true
 ---
-apiVersion: addons.config.k8s.io/v1alpha1
+apiVersion: addons.config.x-k8s.io/v1alpha1
 kind: AddonInstallerConfiguration
 addons:
-- github.com/dholbach/intel-device-plugins-for-kubernetes//deployments/gpu_plugin/
-- github.com/dholbach/weave//prog/weave-kube/
+- name: gpu-plugin
+  kustomizeRef: github.com/dholbach/intel-device-plugins-for-kubernetes//deployments/gpu_plugin/
+- name: weave-net
+  kustomizeRef: github.com/dholbach/weave//prog/weave-kube/
