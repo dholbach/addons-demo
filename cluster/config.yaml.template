@@ -20,6 +20,6 @@ apiVersion: addons.config.x-k8s.io/v1alpha1
 kind: AddonInstallerConfiguration
 addons:
 - name: gpu-plugin
-  kustomizeRef: github.com/dholbach/intel-device-plugins-for-kubernetes//deployments/gpu_plugin/
+  manifestRef: https://raw.githubusercontent.com/intel/intel-device-plugins-for-kubernetes/v0.15.0/deployments/gpu_plugin/gpu_plugin.yaml
 - name: weave-net
-  kustomizeRef: github.com/dholbach/weave//prog/weave-kube/
+  manifestRef: https://raw.githubusercontent.com/weaveworks/weave/v2.6.0/prog/weave-kube/weave-daemonset-k8s-1.11.yaml
