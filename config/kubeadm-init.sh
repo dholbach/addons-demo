@@ -24,9 +24,9 @@ sed "s/ETH1_IP/${eth1_ip}/g;
     "$CLUSTER_CONFIG".template > "$CLUSTER_CONFIG"
 
 stat "$KUBECONFIG" || \
-kubeadm init --ignore-preflight-errors --config="$CLUSTER_CONFIG" && \
-#kubeadm init phase addon kube-proxy --config=<(sed "/AddonInstaller:/d" "$CLUSTER_CONFIG") && \
+kubeadm init --config="$CLUSTER_CONFIG" --v=5 #&& \
 kubeadm init phase addon coredns --config=<(sed "/AddonInstaller:/d" "$CLUSTER_CONFIG")
+#kubeadm init phase addon kube-proxy --config=<(sed "/AddonInstaller:/d" "$CLUSTER_CONFIG") && \
 
 
 # Make this control plane node able to run normal workloads
