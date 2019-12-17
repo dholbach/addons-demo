@@ -22,7 +22,7 @@ the following specifications and code:
 - Addon Installer
   - [the installer itself](https://github.com/kubernetes-sigs/addon-operators/pull/25)
   - [KEP Installing Addons in Kubeadm](https://github.com/kubernetes/enhancements/pull/1308)
-  - [Integration of addon installer in kubeadm](https://github.com/kubernetes/kubernetes/compare/master...stealthybox:kubeadm-addon-installer)
+  - [Integration of addon installer in kubeadm](https://github.com/kubernetes/kubernetes/pull/85224)
   - Discussions about how to integrate into `kops` are underway.
 
 Check out the [meeting minutes](https://docs.google.com/document/d/10_tl_SXcFGb-2109QpcFVrdrfnVEuQ05MBrXtasB0vk/edit) (and videos) for more details and please join the next meetings.
@@ -98,7 +98,7 @@ cluster](https://github.com/dholbach/gpu-demo/blob/master/config/kubeadm-init.sh
 > that is passed to `kubeadm`.
 >
 > Here are the [addon related
-> config](https://github.com/dholbach/gpu-demo/blob/master/cluster/config.yaml.template#L19-L22)
+> config](https://github.com/dholbach/gpu-demo/blob/master/cluster/config.yaml.template#L19-L25)
 > bits.
 
 ## Checking in on the cluster
