@@ -17,10 +17,10 @@ the following specifications and code:
 
 - Addon Operators
   - [KEP Addons via Operators](https://github.com/kubernetes/enhancements/blob/master/keps/sig-cluster-lifecycle/addons/0035-20190128-addons-via-operators.md)
-  - [CoreDNS addon operator](https://github.com/kubernetes-sigs/addon-operators/tree/master/coredns)
+  - [CoreDNS addon operator](https://github.com/kubernetes-sigs/cluster-addons/tree/master/coredns)
   - [kubebuilder support for addons](https://github.com/kubernetes-sigs/kubebuilder/pull/943)
 - Addon Installer
-  - [the installer itself](https://github.com/kubernetes-sigs/addon-operators/pull/25)
+  - [the installer itself](https://github.com/kubernetes-sigs/cluster-addons/tree/master/installer)
   - [KEP Installing Addons in Kubeadm](https://github.com/kubernetes/enhancements/pull/1308)
   - [Integration of addon installer in kubeadm](https://github.com/kubernetes/kubernetes/pull/85224)
   - Discussions about how to integrate into `kops` are underway.
